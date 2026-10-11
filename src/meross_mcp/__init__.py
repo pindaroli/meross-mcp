@@ -1,5 +1,6 @@
 """Meross Dual Gateway (MCP Server + REST API Gateway + Python Library)."""
 
+from meross_mcp.app import create_app
 from meross_mcp.client import (
     MerossClientManager,
     MerossDeviceNotFoundError,
@@ -11,6 +12,7 @@ from meross_mcp.devices import (
     DeviceInfo,
     ElectricityData,
 )
+from meross_mcp.server import mcp
 
 __version__ = "0.1.0"
 __all__ = [
@@ -21,5 +23,7 @@ __all__ = [
     "ElectricityData",
     "MerossDeviceNotFoundError",
     "MerossOperationError",
+    "create_app",
+    "mcp",
     "__version__",
 ]
