@@ -1,0 +1,41 @@
+name: Publish to PyPI & GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-publish:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for PyPI Trusted Publishing (OIDC)
+      contents: write  # Required to attach artifacts to GitHub Releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          # Note: configured via PyPI Trusted Publishing OIDC for repository 'pindaroli/meross-mcp'
