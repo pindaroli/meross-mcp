@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meross-mcp"
+version = "0.1.0"
+description = "Zero-install Model Context Protocol (MCP) server & REST API Gateway for Meross smart plugs"
+readme = "README.md"
+authors = [
+    { name = "Olindo Pindaroli", email = "olindo@pindaroli.org" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["mcp", "meross", "iot", "smart-plug", "fastmcp", "fastapi", "home-automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "meross-iot==0.4.10.4",
+    "fastmcp>=0.4.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+meross-mcp = "meross_mcp.app:main"
+
+[project.urls]
+Homepage = "https://github.com/pindaroli/meross-mcp"
+Repository = "https://github.com/pindaroli/meross-mcp"
+Issues = "https://github.com/pindaroli/meross-mcp/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/**",
+    "tests/**",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/meross_mcp"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
