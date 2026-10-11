@@ -1,6 +1,6 @@
 """Configuration module for Meross Dual Gateway."""
 
-from typing import Optional
+
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -44,7 +44,7 @@ class MerossSettings(BaseSettings):
     )
 
     # Security Settings (Optional)
-    api_key: Optional[str] = Field(
+    api_key: str | None = Field(
         default=None,
         validation_alias=AliasChoices("MEROSS_GATEWAY_API_KEY", "api_key"),
         description="Optional API Key required for mutative REST API calls (X-API-Key header)",

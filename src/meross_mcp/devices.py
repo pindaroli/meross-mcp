@@ -1,7 +1,8 @@
 """Device models and abstraction utilities for Meross devices."""
 
 from datetime import datetime, timezone
-from typing import Any, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -10,7 +11,7 @@ class DeviceChannel(BaseModel):
 
     channel_id: int = Field(description="Channel index (0 is master or primary channel)")
     name: str = Field(default="", description="Channel name or descriptor")
-    is_on: Optional[bool] = Field(default=None, description="Power state of this channel")
+    is_on: bool | None = Field(default=None, description="Power state of this channel")
 
 
 class ElectricityData(BaseModel):
@@ -32,17 +33,17 @@ class DeviceInfo(BaseModel):
     name: str = Field(description="User-assigned friendly name of the device")
     device_type: str = Field(description="Hardware device model (e.g. mss310, mss210, mss425e)")
     online: bool = Field(description="Online reachability status via Meross Cloud MQTT")
-    channels: List[DeviceChannel] = Field(default_factory=list, description="Available output channels")
+    channels: list[DeviceChannel] = Field(default_factory=list, description="Available output channels")
     has_electricity_meter: bool = Field(
         default=False, description="True if this device model measures power/voltage/current"
     )
-    wifi_signal: Optional[int] = Field(default=None, description="Wi-Fi signal strength percentage")
-    firmware_version: Optional[str] = Field(default=None, description="Firmware version string")
+    wifi_signal: int | None = Field(default=None, description="Wi-Fi signal strength percentage")
+    firmware_version: str | None = Field(default=None, description="Firmware version string")
 
 
 def extract_device_info(device: Any) -> DeviceInfo:
     """Extract standard DeviceInfo from an underlying Meross device object."""
-    channels_list: List[DeviceChannel] = []
+    channels_list: list[DeviceChannel] = []
 
     # Identify channels
     raw_channels = getattr(device, "channels", None)

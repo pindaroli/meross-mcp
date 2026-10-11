@@ -1,6 +1,6 @@
 """Model Context Protocol (MCP) server implementation for Meross devices."""
 
-from typing import List
+
 from fastmcp import FastMCP
 
 from meross_mcp.client import MerossClientManager
@@ -13,7 +13,7 @@ mcp = FastMCP(
 
 
 @mcp.tool()
-async def meross_list_devices(update: bool = True) -> List[DeviceInfo]:
+async def meross_list_devices(update: bool = True) -> list[DeviceInfo]:
     """List all registered Meross smart plugs and power strips with their current status."""
     client = await MerossClientManager.get_instance()
     return await client.list_devices(update=update)

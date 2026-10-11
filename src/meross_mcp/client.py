@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
@@ -35,15 +35,15 @@ class MerossClientManager:
     _instance: Optional["MerossClientManager"] = None
     _lock = asyncio.Lock()
 
-    def __init__(self, settings: Optional[MerossSettings] = None):
+    def __init__(self, settings: MerossSettings | None = None):
         """Initialize the client manager with configuration settings."""
         self.settings = settings or MerossSettings()
-        self._http_client: Optional[MerossHttpClient] = None
-        self._manager: Optional[MerossManager] = None
+        self._http_client: MerossHttpClient | None = None
+        self._manager: MerossManager | None = None
         self._initialized = False
 
     @classmethod
-    async def get_instance(cls, settings: Optional[MerossSettings] = None) -> "MerossClientManager":
+    async def get_instance(cls, settings: MerossSettings | None = None) -> "MerossClientManager":
         """Get or initialize the shared singleton manager instance."""
         async with cls._lock:
             if cls._instance is None:
@@ -134,7 +134,7 @@ class MerossClientManager:
             f"{[getattr(d, 'name', '') for d in devices]}"
         )
 
-    async def list_devices(self, update: bool = True) -> List[DeviceInfo]:
+    async def list_devices(self, update: bool = True) -> list[DeviceInfo]:
         """List all registered Meross devices and optionally refresh states."""
         await self.connect()
         devices = self._manager.find_devices() if self._manager else []

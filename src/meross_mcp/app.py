@@ -1,11 +1,9 @@
 """Main application entrypoint and Dual Gateway aggregator (FastAPI + FastMCP)."""
 
 import argparse
-import asyncio
 import logging
-import sys
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import uvicorn
 from fastapi import FastAPI

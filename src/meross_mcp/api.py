@@ -1,6 +1,6 @@
 """FastAPI REST API router for Meross devices."""
 
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
 from meross_mcp.client import (
@@ -8,7 +8,6 @@ from meross_mcp.client import (
     MerossDeviceNotFoundError,
     MerossOperationError,
 )
-from meross_mcp.config import MerossSettings
 from meross_mcp.devices import DeviceInfo, ElectricityData
 
 router = APIRouter(prefix="/api/v1/devices", tags=["Devices"])
@@ -20,7 +19,7 @@ async def get_client() -> MerossClientManager:
 
 
 async def verify_api_key(
-    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    x_api_key: str | None = Header(None, alias="X-API-Key"),
     client: MerossClientManager = Depends(get_client),
 ) -> None:
     """Verify API Key on mutative operations if configured in settings."""
@@ -35,14 +34,14 @@ async def verify_api_key(
 
 @router.get(
     "",
-    response_model=List[DeviceInfo],
+    response_model=list[DeviceInfo],
     summary="List all devices",
     description="Retrieve all registered Meross plugs and power strips with current state.",
 )
 async def list_devices(
     update: bool = Query(True, description="Query devices in real-time via MQTT"),
     client: MerossClientManager = Depends(get_client),
-) -> List[DeviceInfo]:
+) -> list[DeviceInfo]:
     try:
         return await client.list_devices(update=update)
     except Exception as e:
