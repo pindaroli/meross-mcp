@@ -29,7 +29,7 @@ RUN groupadd -g 1000 appuser && \
 
 # Install built wheel
 COPY --from=builder /app/dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl curl && rm -rf /tmp/*.whl
+RUN pip install --no-cache-dir /tmp/*.whl && rm -rf /tmp/*.whl
 
 USER appuser
 
