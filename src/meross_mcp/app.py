@@ -21,34 +21,35 @@ logging.basicConfig(
 logger = logging.getLogger("meross_mcp")
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Application lifespan context manager for startup and shutdown hooks."""
-    settings: MerossSettings = getattr(app.state, "settings", MerossSettings())
-    logger.info("Initializing Meross Dual Gateway on %s:%d...", settings.host, settings.port)
-    
-    # Pre-warm connection if credentials are configured
-    if settings.email and settings.password:
-        try:
-            client = await MerossClientManager.get_instance(settings)
-            await client.connect()
-        except Exception as e:
-            logger.warning("Initial connection to Meross Cloud postponed or failed: %s", e)
-
-    yield
-
-    # Graceful shutdown: close persistent MQTT connections and log out
-    logger.info("Shutting down Meross Dual Gateway...")
-    try:
-        client = await MerossClientManager.get_instance(settings)
-        await client.close()
-    except Exception as e:
-        logger.warning("Error during graceful shutdown: %s", e)
-
-
 def create_app(settings: MerossSettings | None = None) -> FastAPI:
     """Create and configure the unified FastAPI Dual Gateway application."""
     app_settings = settings or MerossSettings()
+    mcp_app = mcp.http_app(path="/mcp")
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+        """Application lifespan context manager for startup and shutdown hooks."""
+        logger.info("Initializing Meross Dual Gateway on %s:%d...", app_settings.host, app_settings.port)
+
+        # Pre-warm connection if credentials are configured
+        if app_settings.email and app_settings.password:
+            try:
+                client = await MerossClientManager.get_instance(app_settings)
+                await client.connect()
+            except Exception as e:
+                logger.warning("Initial connection to Meross Cloud postponed or failed: %s", e)
+
+        # Drive FastMCP's StreamableHTTPSessionManager task group lifespan
+        async with mcp_app.lifespan(app):
+            yield
+
+        # Graceful shutdown: close persistent MQTT connections and log out
+        logger.info("Shutting down Meross Dual Gateway...")
+        try:
+            client = await MerossClientManager.get_instance(app_settings)
+            await client.close()
+        except Exception as e:
+            logger.warning("Error during graceful shutdown: %s", e)
 
     app = FastAPI(
         title="Meross Dual Gateway",
@@ -56,7 +57,7 @@ def create_app(settings: MerossSettings | None = None) -> FastAPI:
             "Unified Model Context Protocol (MCP) server & REST API Gateway for Meross smart plugs. "
             "Provides interactive OpenAPI documentation and real-time MQTT device control."
         ),
-        version="0.1.1",
+        version="0.1.2",
         lifespan=lifespan,
     )
     app.state.settings = app_settings
@@ -78,8 +79,8 @@ def create_app(settings: MerossSettings | None = None) -> FastAPI:
     # Include REST API routes (/api/v1/devices)
     app.include_router(api_router)
 
-    # Mount FastMCP HTTP/SSE application on /mcp (internal path="/" so /mcp maps to FastMCP root)
-    app.mount("/mcp", mcp.http_app(path="/"))
+    # Mount FastMCP application directly so /mcp matches without redirect
+    app.mount("", mcp_app)
 
     return app
 

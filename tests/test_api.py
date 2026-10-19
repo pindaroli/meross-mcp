@@ -96,6 +96,10 @@ async def test_rest_device_not_found(app) -> None:
 @pytest.mark.asyncio
 async def test_mcp_mount_endpoint(app) -> None:
     async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        # Verify /mcp routes to FastMCP sub-app rather than returning 404
-        response = await ac.get("/mcp")
-    assert response.status_code != 404
+        # Verify /mcp routes directly to FastMCP without 404 or 500
+        response = await ac.post(
+            "/mcp",
+            json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+            headers={"Accept": "application/json, text/event-stream"},
+        )
+    assert response.status_code in (200, 400, 406)
