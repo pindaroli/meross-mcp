@@ -218,7 +218,7 @@ class MerossClientManager:
         else:
             return await self.turn_on(id_or_name, channel=channel)
 
-    async def get_electricity(self, id_or_name: str) -> ElectricityData:
+    async def get_electricity(self, id_or_name: str, channel: int = 0) -> ElectricityData:
         """Retrieve real-time power consumption (Watt, Volt, Ampere)."""
         await self.connect()
         dev = self._find_raw_device(id_or_name)
@@ -228,17 +228,26 @@ class MerossClientManager:
             await dev.async_update()
 
         raw_metrics = None
-        if hasattr(dev, "get_electricity"):
+        if hasattr(dev, "async_get_instant_metrics"):
+            try:
+                raw_metrics = await dev.async_get_instant_metrics(channel=channel)
+            except Exception as e:
+                logger.warning("async_get_instant_metrics failed on '%s': %s", dev.name, e)
+
+        if raw_metrics is None and hasattr(dev, "get_electricity"):
             raw_metrics = dev.get_electricity()
-        elif hasattr(dev, "get_instant_metrics"):
+        elif raw_metrics is None and hasattr(dev, "get_instant_metrics"):
             raw_metrics = dev.get_instant_metrics()
+
+        if raw_metrics is None and hasattr(dev, "get_last_sample"):
+            raw_metrics = dev.get_last_sample(channel=channel)
 
         if raw_metrics is None:
             raise MerossOperationError(
                 f"Device '{dev.name}' ({getattr(dev, 'type', 'unknown')}) does not support electricity telemetry."
             )
 
-        # Extract values (supporting both dict and object attributes)
+        # Extract values (supporting dict, PowerInfo object with properties, or attributes)
         if isinstance(raw_metrics, dict):
             power = float(raw_metrics.get("power", 0.0))
             voltage = float(raw_metrics.get("voltage", 0.0))

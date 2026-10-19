@@ -1,7 +1,7 @@
 services:
   meross-gateway:
     build: .
-    image: ghcr.io/pindaroli/meross-mcp:0.1.0
+    image: ghcr.io/pindaroli/meross-mcp:0.1.1
     container_name: meross-gateway
     restart: unless-stopped
     ports:

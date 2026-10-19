@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "meross-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Zero-install Model Context Protocol (MCP) server & REST API Gateway for Meross smart plugs"
 readme = "README.md"
 authors = [

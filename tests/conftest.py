@@ -16,6 +16,27 @@ class MockChannel:
         self.name = name
 
 
+class MockPowerInfo:
+    """Mock for meross_iot PowerInfo dataclass."""
+
+    def __init__(self, power: float, voltage: float, current: float):
+        self._power = power
+        self._voltage = voltage
+        self._current = current
+
+    @property
+    def power(self) -> float:
+        return self._power
+
+    @property
+    def voltage(self) -> float:
+        return self._voltage
+
+    @property
+    def current(self) -> float:
+        return self._current
+
+
 class MockDevice:
     """Mock representing a physical Meross smart device."""
 
@@ -57,10 +78,16 @@ class MockDevice:
         """Toggle channel."""
         self._states[channel] = not self._states.get(channel, False)
 
-    def get_electricity(self) -> dict[str, float]:
-        """Return simulated electricity telemetry."""
+    async def async_get_instant_metrics(self, channel: int = 0) -> MockPowerInfo | None:
+        """Simulate async_get_instant_metrics returning PowerInfo-like object."""
         if not self._has_electricity:
-            return None  # type: ignore
+            return None
+        return MockPowerInfo(power=45.5, voltage=230.2, current=0.198)
+
+    def get_electricity(self) -> dict[str, float] | None:
+        """Return simulated electricity telemetry fallback."""
+        if not self._has_electricity:
+            return None
         return {"power": 45.5, "voltage": 230.2, "current": 0.198}
 
 

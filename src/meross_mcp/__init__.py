@@ -14,7 +14,7 @@ from meross_mcp.devices import (
 )
 from meross_mcp.server import mcp
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = [
     "MerossClientManager",
     "MerossSettings",

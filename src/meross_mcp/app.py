@@ -56,7 +56,7 @@ def create_app(settings: MerossSettings | None = None) -> FastAPI:
             "Unified Model Context Protocol (MCP) server & REST API Gateway for Meross smart plugs. "
             "Provides interactive OpenAPI documentation and real-time MQTT device control."
         ),
-        version="0.1.0",
+        version="0.1.1",
         lifespan=lifespan,
     )
     app.state.settings = app_settings
@@ -78,8 +78,8 @@ def create_app(settings: MerossSettings | None = None) -> FastAPI:
     # Include REST API routes (/api/v1/devices)
     app.include_router(api_router)
 
-    # Mount FastMCP HTTP/SSE application on /mcp
-    app.mount("/mcp", mcp.http_app())
+    # Mount FastMCP HTTP/SSE application on /mcp (internal path="/" so /mcp maps to FastMCP root)
+    app.mount("/mcp", mcp.http_app(path="/"))
 
     return app
 

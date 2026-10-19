@@ -156,10 +156,11 @@ async def toggle_device(
 )
 async def get_electricity(
     device_id: str,
+    channel: int = Query(0, description="Output channel index (0 is master or primary)"),
     client: MerossClientManager = Depends(get_client),
 ) -> ElectricityData:
     try:
-        return await client.get_electricity(device_id)
+        return await client.get_electricity(device_id, channel=channel)
     except MerossDeviceNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except MerossOperationError as e:

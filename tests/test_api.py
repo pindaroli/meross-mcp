@@ -78,7 +78,7 @@ async def test_rest_toggle(app) -> None:
 @pytest.mark.asyncio
 async def test_rest_power_telemetry(app) -> None:
     async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.get("/api/v1/devices/uuid-plug-mss310/power")
+        response = await ac.get("/api/v1/devices/uuid-plug-mss310/power?channel=0")
     assert response.status_code == 200
     data = response.json()
     assert data["power_w"] == 45.5
@@ -91,3 +91,11 @@ async def test_rest_device_not_found(app) -> None:
     async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.get("/api/v1/devices/unknown-device-id")
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_mcp_mount_endpoint(app) -> None:
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        # Verify /mcp routes to FastMCP sub-app rather than returning 404
+        response = await ac.get("/mcp")
+    assert response.status_code != 404

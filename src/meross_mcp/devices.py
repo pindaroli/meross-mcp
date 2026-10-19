@@ -70,7 +70,8 @@ def extract_device_info(device: Any) -> DeviceInfo:
 
     # Check power consumption capability
     has_electricity = (
-        hasattr(device, "get_electricity")
+        hasattr(device, "async_get_instant_metrics")
+        or hasattr(device, "get_electricity")
         or hasattr(device, "get_instant_metrics")
         or "electricity" in getattr(device, "abilities", {})
     )

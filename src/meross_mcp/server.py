@@ -48,7 +48,7 @@ async def meross_toggle(device_id_or_name: str, channel: int = 0) -> DeviceInfo:
 
 
 @mcp.tool()
-async def meross_get_electricity(device_id_or_name: str) -> ElectricityData:
+async def meross_get_electricity(device_id_or_name: str, channel: int = 0) -> ElectricityData:
     """Read instant power consumption telemetry (Watts, Volts, Amperes) from power-metering plugs (e.g. MSS310)."""
     client = await MerossClientManager.get_instance()
-    return await client.get_electricity(device_id_or_name)
+    return await client.get_electricity(device_id_or_name, channel=channel)
